@@ -1,143 +1,177 @@
-A modern, scalable web application built with a performance-focused frontend stack and clean architecture.
+# 🏛️ Explore Ancient India
 
-🌐 Live Demo
+![React](https://img.shields.io/badge/React-19-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Vite](https://img.shields.io/badge/Vite-Fast-purple)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Utility--First-38B2AC)
+![Supabase](https://img.shields.io/badge/Supabase-Backend-green)
+![License](https://img.shields.io/badge/License-MIT-success)
 
-🔗 https://your-domain.com
+An interactive digital platform designed to explore the depth of Ancient India's knowledge systems, architecture, manuscripts, philosophy, and scientific contributions using a modern web stack.
 
-(Replace with your deployed URL)
+🔗 Repository:  
+https://github.com/Ayush17514/Explore-Ancient-India
 
-📸 Preview
+---
 
-Add screenshots here (recommended for GitHub impact)
+## 🌐 Project Overview
 
-![App Screenshot](./screenshots/home.png)
-✨ Features
+Explore Ancient India is a structured knowledge platform built with a modern frontend architecture and integrated backend services.
 
-⚡ Lightning-fast development with Vite
+The platform includes:
 
-🎨 Responsive UI with Tailwind CSS
+- 📜 Ancient manuscripts exploration
+- 🏛️ Architectural heritage sections
+- 📚 Knowledge systems & philosophy
+- 🔬 Scientific contributions
+- 🤝 Research collaboration section
+- 🔎 AI-powered search interface
+- 🧭 Structured knowledge pillars
 
-🧩 Reusable component architecture
+---
 
-🔐 Type-safe codebase with TypeScript
+## 🚀 Tech Stack
 
-📦 Clean and scalable folder structure
+### Frontend
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
 
-🚀 Production-optimized builds
+### Backend & Services
+- Supabase (Database & API integration)
 
-🛠 Tech Stack
-Frontend
+### Testing
+- Vitest
 
-React
+---
 
-TypeScript
+## 📂 Project Structure
 
-Vite
-
-Tailwind CSS
-
-shadcn/ui
-
-Tooling
-
-Node.js
-
-npm
-
-📂 Folder Structure
-project-root/
+```
+Explore-Ancient-India/
 │
 ├── public/
 ├── src/
-│   ├── components/
-│   ├── pages/
-│   ├── hooks/
-│   ├── lib/
 │   ├── assets/
+│   ├── components/
+│   │   ├── home/
+│   │   └── ui/
+│   ├── hooks/
+│   ├── integrations/
+│   │   └── supabase/
+│   ├── pages/
+│   ├── test/
+│   ├── lib/
 │   └── main.tsx
 │
-├── index.html
+├── supabase/
 ├── package.json
-├── tsconfig.json
-└── vite.config.ts
-⚙️ Getting Started
-Prerequisites
+├── vite.config.ts
+└── tailwind.config.ts
+```
 
-Node.js (v18 or higher)
+---
 
-npm
+## ⚙️ Installation & Setup
 
-Installation
-# Clone the repository
-git clone https://github.com/your-username/your-repo.git
+### 1️⃣ Clone Repository
 
-# Navigate into the project
-cd your-repo
+```bash
+git clone https://github.com/Ayush17514/Explore-Ancient-India.git
+cd Explore-Ancient-India
+```
 
-# Install dependencies
+### 2️⃣ Install Dependencies
+
+```bash
 npm install
+```
 
-# Start development server
+### 3️⃣ Configure Environment Variables
+
+Create a `.env` file in the root folder:
+
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 4️⃣ Start Development Server
+
+```bash
 npm run dev
+```
 
 Application runs at:
 
+```
 http://localhost:5173
-🏗 Build for Production
+```
+
+---
+
+## 🏗 Build for Production
+
+```bash
 npm run build
+```
 
-Preview production build:
+Preview build:
 
+```bash
 npm run preview
-🚀 Deployment
+```
 
-You can deploy easily to:
+---
 
-Vercel
+## 🧪 Run Tests
 
-Netlify
+```bash
+npm run test
+```
 
-Render
+---
 
-Railway
+## ✨ Key Features
 
-Example (Vercel):
+- Modular component architecture
+- Reusable UI components
+- Supabase integration
+- Responsive design
+- Clean and scalable folder structure
+- Optimized performance
 
-vercel
-🧪 Available Scripts
-Command	Description
-npm run dev	Start development server
-npm run build	Create production build
-npm run preview	Preview production build
-npm run lint	Run lint checks
-📈 Roadmap
+---
 
- Authentication system
+## 📌 Future Improvements
 
- Backend API integration
+- Advanced manuscript filtering
+- User authentication & contributions
+- Admin research dashboard
+- Performance optimization
+- Content management integration
 
- Database connectivity
+---
 
- Admin dashboard
+## 🤝 Contributing
 
- Dark mode toggle
+1. Fork the repository
+2. Create a feature branch
+3. Commit changes
+4. Push branch
+5. Open a Pull Request
 
- SEO optimization
+---
 
-🤝 Contributing
+## 📄 License
 
-Contributions are welcome.
+MIT License
 
-Fork the repository
+---
 
-Create a feature branch
+## 👤 Author
 
-Commit your changes
-
-Push to your branch
-
-Open a Pull Request
-
-📄 License
-
-This project is licensed under the MIT License.
+Ayush Agrawal  
+GitHub: https://github.com/Ayush17514
