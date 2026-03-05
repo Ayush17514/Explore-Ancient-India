@@ -44,6 +44,45 @@ export type Database = {
         }
         Relationships: []
       }
+      api_keys: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          rate_limit_per_minute: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name?: string
+          rate_limit_per_minute?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          rate_limit_per_minute?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       architecture_sites: {
         Row: {
           architectural_style: string | null
@@ -468,6 +507,63 @@ export type Database = {
           reviewed_by?: string | null
           status?: string
           submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      supported_languages: {
+        Row: {
+          code: string
+          is_active: boolean
+          name: string
+          native_name: string
+        }
+        Insert: {
+          code: string
+          is_active?: boolean
+          name: string
+          native_name: string
+        }
+        Update: {
+          code?: string
+          is_active?: boolean
+          name?: string
+          native_name?: string
+        }
+        Relationships: []
+      }
+      translations: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          field_name: string
+          id: string
+          is_machine_translated: boolean
+          language_code: string
+          translated_text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          field_name: string
+          id?: string
+          is_machine_translated?: boolean
+          language_code: string
+          translated_text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          field_name?: string
+          id?: string
+          is_machine_translated?: boolean
+          language_code?: string
+          translated_text?: string
           updated_at?: string
         }
         Relationships: []
