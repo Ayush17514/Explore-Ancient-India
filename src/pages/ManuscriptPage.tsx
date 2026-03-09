@@ -1,10 +1,40 @@
+import { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, BookOpen, Calendar, MapPin, FileText, MessageSquare } from "lucide-react";
+import { Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, BookOpen, Calendar, MapPin, FileText, MessageSquare, Copy, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import manuscriptImg from "@/assets/manuscript-sample.jpg";
 
 const ManuscriptPage = () => {
+  const [currentFolio, setCurrentFolio] = useState(1);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
+  const totalFolios = 18;
+
+  const handlePrevFolio = () => setCurrentFolio((p) => Math.max(1, p - 1));
+  const handleNextFolio = () => setCurrentFolio((p) => Math.min(totalFolios, p + 1));
+  const handleZoomIn = () => setZoomLevel((p) => Math.min(3, p + 0.25));
+  const handleZoomOut = () => setZoomLevel((p) => Math.max(0.5, p - 0.25));
+
+  const apaCitation = `Digital Nalanda Archive. (2024). Isha Upanishad: Palm Leaf Manuscript (NAI-MS-1842-UPN). National Archives of India.`;
+
+  const handleCopyCitation = () => {
+    navigator.clipboard.writeText(apaCitation).then(() => {
+      setCopied(true);
+      toast({ title: "Citation copied to clipboard" });
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleDownloadPdf = () => {
+    toast({
+      title: "Download started",
+      description: "The manuscript PDF is being prepared for download.",
+    });
+  };
+
   return (
     <Layout>
       <section className="py-6 bg-card border-b border-border">
@@ -30,19 +60,56 @@ const ManuscriptPage = () => {
             <div className="lg:col-span-2">
               <div className="rounded-lg border border-border bg-card overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2 bg-secondary border-b border-border">
-                  <span className="font-body text-xs text-muted-foreground">Folio 1 of 18</span>
+                  <span className="font-body text-xs text-muted-foreground">
+                    Folio {currentFolio} of {totalFolios}
+                  </span>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><ChevronLeft className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><ChevronRight className="h-4 w-4" /></Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                      onClick={handlePrevFolio}
+                      disabled={currentFolio === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                      onClick={handleNextFolio}
+                      disabled={currentFolio === totalFolios}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
                     <Separator orientation="vertical" className="h-4 mx-1" />
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><ZoomIn className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><ZoomOut className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleZoomIn}>
+                      <ZoomIn className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleZoomOut}>
+                      <ZoomOut className="h-4 w-4" />
+                    </Button>
+                    <span className="text-[10px] text-muted-foreground font-mono w-10 text-center">
+                      {Math.round(zoomLevel * 100)}%
+                    </span>
                     <Separator orientation="vertical" className="h-4 mx-1" />
-                    <Button variant="ghost" size="sm" className="h-7 text-xs font-body"><Download className="h-3 w-3 mr-1" /> PDF</Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs font-body"
+                      onClick={handleDownloadPdf}
+                    >
+                      <Download className="h-3 w-3 mr-1" /> PDF
+                    </Button>
                   </div>
                 </div>
-                <div className="bg-foreground/5 p-8 flex items-center justify-center min-h-[400px]">
-                  <img src={manuscriptImg} alt="Isha Upanishad palm leaf manuscript" className="max-w-full max-h-96 object-contain rounded shadow-xl" />
+                <div className="bg-foreground/5 p-8 flex items-center justify-center min-h-[400px] overflow-auto">
+                  <img
+                    src={manuscriptImg}
+                    alt="Isha Upanishad palm leaf manuscript"
+                    className="max-w-full object-contain rounded shadow-xl transition-transform duration-200"
+                    style={{ transform: `scale(${zoomLevel})`, transformOrigin: "center center" }}
+                  />
                 </div>
               </div>
 
@@ -84,7 +151,7 @@ const ManuscriptPage = () => {
                     ["Language", "Sanskrit (Devanagari)"],
                     ["Material", "Palm Leaf"],
                     ["Dimensions", "32 × 5.5 cm"],
-                    ["Folios", "18"],
+                    ["Folios", String(totalFolios)],
                     ["Repository", "National Archives of India"],
                     ["Accession No.", "NAI-MS-1842-UPN"],
                     ["Digitized", "2024"],
@@ -104,11 +171,20 @@ const ManuscriptPage = () => {
                   <div>
                     <p className="font-body text-[10px] uppercase tracking-wider text-gold font-semibold mb-1">APA</p>
                     <p className="font-body text-xs text-muted-foreground leading-relaxed bg-secondary p-2 rounded">
-                      Digital Nalanda Archive. (2024). <em>Isha Upanishad: Palm Leaf Manuscript</em> (NAI-MS-1842-UPN). National Archives of India.
+                      {apaCitation}
                     </p>
                   </div>
-                  <Button variant="outline" size="sm" className="w-full font-body text-xs">
-                    <FileText className="h-3 w-3 mr-1" /> Export Citation
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full font-body text-xs"
+                    onClick={handleCopyCitation}
+                  >
+                    {copied ? (
+                      <><Check className="h-3 w-3 mr-1" /> Copied!</>
+                    ) : (
+                      <><Copy className="h-3 w-3 mr-1" /> Copy Citation</>
+                    )}
                   </Button>
                 </div>
               </div>

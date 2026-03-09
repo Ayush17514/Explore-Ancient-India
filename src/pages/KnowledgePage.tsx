@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,13 +11,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, BookOpen, Calendar, MapPin, FileText } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Search, BookOpen, Calendar, MapPin, FileText, Copy, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   useSupportedLanguages,
   useTranslations,
   useLanguageState,
 } from "@/hooks/useTranslation";
+import { useToast } from "@/hooks/use-toast";
 
 /* ---------------------- */
 /* Domain Categories */
@@ -52,6 +60,14 @@ type KnowledgeRecord = {
   _region?: string | null;
 };
 
+function generateCitation(record: KnowledgeRecord, format: "apa" | "mla"): string {
+  const year = record.estimated_period || new Date().getFullYear();
+  if (format === "apa") {
+    return `Digital Nalanda Archive. (${year}). ${record.title}. Explore Ancient India Knowledge Platform.`;
+  }
+  return `"${record.title}." Digital Nalanda Archive, Explore Ancient India, ${year}.`;
+}
+
 /* ---------------------- */
 /* Page Component */
 /* ---------------------- */
@@ -59,6 +75,11 @@ type KnowledgeRecord = {
 const KnowledgePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDomain, setSelectedDomain] = useState("All Domains");
+  const [citationRecord, setCitationRecord] = useState<KnowledgeRecord | null>(null);
+  const [citationFormat, setCitationFormat] = useState<"apa" | "mla">("apa");
+  const [copied, setCopied] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const { language, setLanguage, getField } = useLanguageState();
   const { data: languages } = useSupportedLanguages();
@@ -199,14 +220,17 @@ const KnowledgePage = () => {
   }, [manuscripts, sites, schools, tribal]);
 
   /* ---------------------- */
-  /* Filter */
+  /* Filter — search title AND description */
   /* ---------------------- */
 
   const filteredRecords = useMemo(() => {
     return allRecords.filter((r) => {
-      const matchesSearch = r.title
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase());
+      const q = searchQuery.toLowerCase();
+      const matchesSearch =
+        !q ||
+        r.title?.toLowerCase().includes(q) ||
+        r.description?.toLowerCase().includes(q) ||
+        r._region?.toLowerCase().includes(q);
 
       const matchesDomain =
         selectedDomain === "All Domains" || r.domain === selectedDomain;
@@ -264,6 +288,33 @@ const KnowledgePage = () => {
   };
 
   /* ---------------------- */
+  /* Cite handler */
+  /* ---------------------- */
+
+  const handleCite = (record: KnowledgeRecord) => {
+    setCitationRecord(record);
+    setCopied(false);
+  };
+
+  const copyCitation = () => {
+    if (!citationRecord) return;
+    const text = generateCitation(citationRecord, citationFormat);
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      toast({ title: "Citation copied to clipboard" });
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  /* ---------------------- */
+  /* View Record handler */
+  /* ---------------------- */
+
+  const handleViewRecord = (record: KnowledgeRecord) => {
+    navigate(`/records/${record._entity}/${record.id}`);
+  };
+
+  /* ---------------------- */
   /* UI */
   /* ---------------------- */
 
@@ -312,7 +363,7 @@ const KnowledgePage = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 
               <Input
-                placeholder="Search knowledge records..."
+                placeholder="Search by title, description, or region..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -398,12 +449,21 @@ const KnowledgePage = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCite(record)}
+                      >
                         <FileText className="h-3 w-3 mr-1" />
                         Cite
                       </Button>
 
-                      <Button size="sm">View Record</Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleViewRecord(record)}
+                      >
+                        View Record
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -422,6 +482,53 @@ const KnowledgePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Citation Dialog */}
+      <Dialog open={!!citationRecord} onOpenChange={(open) => !open && setCitationRecord(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading text-lg">Cite This Record</DialogTitle>
+          </DialogHeader>
+
+          {citationRecord && (
+            <div className="space-y-4">
+              <p className="text-sm font-medium text-foreground">{citationRecord.title}</p>
+
+              <div className="flex gap-1">
+                {(["apa", "mla"] as const).map((fmt) => (
+                  <button
+                    key={fmt}
+                    onClick={() => { setCitationFormat(fmt); setCopied(false); }}
+                    className={`px-3 py-1.5 rounded text-xs uppercase font-semibold tracking-wider transition-colors ${
+                      citationFormat === fmt
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {fmt}
+                  </button>
+                ))}
+              </div>
+
+              <div className="bg-secondary p-4 rounded text-sm font-body text-muted-foreground leading-relaxed">
+                {generateCitation(citationRecord, citationFormat)}
+              </div>
+
+              <Button
+                className="w-full font-body"
+                onClick={copyCitation}
+                variant={copied ? "secondary" : "default"}
+              >
+                {copied ? (
+                  <><Check className="h-4 w-4 mr-2" /> Copied!</>
+                ) : (
+                  <><Copy className="h-4 w-4 mr-2" /> Copy Citation</>
+                )}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

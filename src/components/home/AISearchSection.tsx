@@ -1,35 +1,31 @@
 import { useState } from "react";
-import { Search, FileText, Database, Download, BookOpen } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search, FileText, Database, Download, BookOpen, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const mockResults = [
-  {
-    category: "Architecture & Engineering",
-    title: "Stepwell Systems of Rajasthan: Design and Hydrology",
-    source: "Archaeological Survey of India, Report 342-B",
-    citations: 47,
-  },
-  {
-    category: "Textual Knowledge",
-    title: "Arthashastra Chapter 2.6: Water Management and Irrigation",
-    source: "Kautilya's Arthashastra, R. Shamasastry Translation, 1915",
-    citations: 128,
-  },
-  {
-    category: "Scientific Contributions",
-    title: "Ancient Indian Hydraulic Engineering: Ahar-Pyne System of Bihar",
-    source: "Indian Journal of History of Science, Vol. 38(2)",
-    citations: 31,
-  },
-];
+import { useGlobalSearch } from "@/hooks/useGlobalSearch";
 
 const AISearchSection = () => {
-  const [query, setQuery] = useState("");
-  const [showResults, setShowResults] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const { results, loading, search } = useGlobalSearch();
+  const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setShowResults(true);
+    search(inputValue);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    search(e.target.value);
+  };
+
+  const TYPE_MAP: Record<string, string> = {
+    manuscript: "manuscripts",
+    site: "architecture_sites",
+    school: "philosophical_schools",
+    tribal: "tribal_records",
+    citation: "citations",
+    research: "research_submissions",
   };
 
   return (
@@ -43,7 +39,7 @@ const AISearchSection = () => {
             Intelligent Knowledge Search
           </h2>
           <p className="font-body text-muted-foreground max-w-2xl mx-auto">
-            Query India's knowledge archives using natural language. Our AI engine indexes texts, artifacts, and scholarly works.
+            Query India's knowledge archives using natural language. Our search engine indexes texts, artifacts, and scholarly works across all domains.
           </p>
         </div>
 
@@ -53,53 +49,81 @@ const AISearchSection = () => {
               <Search className="h-5 w-5 text-muted-foreground ml-4" />
               <input
                 type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ask: Show me ancient Indian water management systems relevant to Rajasthan climate."
+                value={inputValue}
+                onChange={handleInputChange}
+                placeholder="Search: ancient Indian water management, Vedic mathematics, temple architecture..."
                 className="flex-1 bg-transparent px-4 py-4 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
+              {loading && <Loader2 className="h-4 w-4 text-muted-foreground animate-spin mr-2" />}
               <Button type="submit" size="sm" className="mr-2 font-body">
                 Search
               </Button>
             </div>
           </form>
 
-          {showResults && (
+          {results.length > 0 && (
             <div className="space-y-4 animate-fade-up">
               <div className="flex items-center justify-between mb-2">
                 <p className="font-body text-sm text-muted-foreground">
-                  <span className="text-foreground font-semibold">3 results</span> across knowledge domains
+                  <span className="text-foreground font-semibold">{results.length} result{results.length !== 1 ? "s" : ""}</span> across knowledge domains
                 </p>
-                <Button variant="outline" size="sm" className="font-body text-xs gap-1">
-                  <Download className="h-3 w-3" /> Export Dataset
-                </Button>
               </div>
 
-              {mockResults.map((result, idx) => (
-                <div key={idx} className="p-5 bg-background rounded-lg border border-border hover:border-primary/30 transition-colors">
+              {results.slice(0, 5).map((result) => (
+                <div key={`${result.type}-${result.id}`} className="p-5 bg-background rounded-lg border border-border hover:border-primary/30 transition-colors">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <span className="inline-block text-xs font-body font-semibold text-gold uppercase tracking-wider mb-1">
-                        {result.category}
+                        {result.typeLabel}
                       </span>
                       <h4 className="font-heading text-base font-semibold text-foreground mb-1">
                         {result.title}
                       </h4>
-                      <p className="font-body text-xs text-muted-foreground flex items-center gap-1">
-                        <FileText className="h-3 w-3" /> {result.source}
-                      </p>
+                      {result.description && (
+                        <p className="font-body text-xs text-muted-foreground flex items-center gap-1 line-clamp-1">
+                          <FileText className="h-3 w-3 shrink-0" /> {result.description}
+                        </p>
+                      )}
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground font-body">
-                        <BookOpen className="h-3 w-3" /> {result.citations} citations
-                      </div>
-                      <Button variant="ghost" size="sm" className="text-xs mt-1 h-7 font-body">
+                      {result.period && (
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground font-body mb-1">
+                          <BookOpen className="h-3 w-3" /> {result.period}
+                        </div>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs h-7 font-body"
+                        onClick={() => navigate(`/records/${TYPE_MAP[result.type]}/${result.id}`)}
+                      >
                         <Database className="h-3 w-3 mr-1" /> View Record
                       </Button>
                     </div>
                   </div>
                 </div>
               ))}
+
+              {results.length > 5 && (
+                <div className="text-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="font-body text-xs"
+                    onClick={() => navigate("/knowledge")}
+                  >
+                    View all {results.length} results in Knowledge Archive
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {inputValue.length >= 2 && results.length === 0 && !loading && (
+            <div className="text-center py-8 text-muted-foreground animate-fade-up">
+              <BookOpen className="h-8 w-8 mx-auto mb-3 opacity-40" />
+              <p className="text-sm">No results found for "{inputValue}"</p>
+              <p className="text-xs mt-1">Try different keywords</p>
             </div>
           )}
         </div>

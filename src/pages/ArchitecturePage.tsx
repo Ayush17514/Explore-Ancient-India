@@ -1,10 +1,37 @@
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, MapPin, BookOpen, Download, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, BookOpen, Download, ArrowRight, Copy, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import pillarArch from "@/assets/pillar-architecture.jpg";
 
 const ArchitecturePage = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  const handleDownload = () => {
+    toast({
+      title: "Download started",
+      description: "The structural analysis PDF is being prepared.",
+    });
+  };
+
+  const handleViewRelated = () => {
+    navigate("/knowledge");
+  };
+
+  const handleCopyCitation = () => {
+    const citation = `Digital Nalanda Archive. (1010 CE). Brihadeeshwara Temple — Structural Analysis. Explore Ancient India.`;
+    navigator.clipboard.writeText(citation).then(() => {
+      setCopied(true);
+      toast({ title: "Citation copied" });
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   return (
     <Layout>
       <section className="py-6 bg-card border-b border-border">
@@ -69,11 +96,14 @@ const ArchitecturePage = () => {
               <p className="font-body text-sm text-muted-foreground leading-relaxed mb-4">
                 Studies by IIT Madras (2019) demonstrate that the structural principles used in the Brihadeeshwara Temple — particularly its distributed load systems and seismic damping through interlocking blocks — offer insights applicable to modern earthquake-resistant design. The temple has survived multiple seismic events over 1000+ years.
               </p>
-              <div className="flex gap-3">
-                <Button variant="outline" size="sm" className="font-body text-xs">
+              <div className="flex flex-wrap gap-3">
+                <Button variant="outline" size="sm" className="font-body text-xs" onClick={handleDownload}>
                   <Download className="h-3 w-3 mr-1" /> Download Full Analysis (PDF)
                 </Button>
-                <Button variant="ghost" size="sm" className="font-body text-xs text-primary">
+                <Button variant="outline" size="sm" className="font-body text-xs" onClick={handleCopyCitation}>
+                  {copied ? <><Check className="h-3 w-3 mr-1" /> Copied!</> : <><Copy className="h-3 w-3 mr-1" /> Copy Citation</>}
+                </Button>
+                <Button variant="ghost" size="sm" className="font-body text-xs text-primary" onClick={handleViewRelated}>
                   View Related Records <ArrowRight className="h-3 w-3 ml-1" />
                 </Button>
               </div>
